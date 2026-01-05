@@ -4,7 +4,7 @@ const API_KEY = "5ae6a264fee9e701870f16ffb3cc71cc";
 const IMG_URL = "https://image.tmdb.org/t/p/w500";
 
 // Cambia esta clave a la tuya
-const ADMIN_PASS = "Blanca";
+const ADMIN_PASS = "blancayecker";
 
 // Reviews iniciales (si no hay nada guardado aún)
 const defaultReviews = [
@@ -251,3 +251,4 @@ function escapeQuotes(str) {
 // -------- Init --------
 applyPermissionsUI();
 renderReviews();
+
