@@ -48,23 +48,28 @@ function generateStars(rating) {
 
 // --- Supabase: verificar si el usuario actual es admin ---
 async function checkIsAdmin() {
-  const { data: sessionData } = await window.supabase.auth.getSession();
-  const user = sessionData?.session?.user;
+  const { data, error } = await window.supabase.auth.getSession();
 
+  if (error) {
+    console.warn("getSession error:", error.message);
+    return false;
+  }
+
+  const user = data?.session?.user;
   if (!user) return false;
 
-  const { data, error } = await window.supabase
+  const { data: adminRow, error: adminErr } = await window.supabase
     .from("admins")
     .select("user_id")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (error) {
-    console.warn("Admins check error:", error.message);
+  if (adminErr) {
+    console.warn("admin check error:", adminErr.message);
     return false;
   }
 
-  return !!data;
+  return !!adminRow;
 }
 
 // --- UI permisos ---
@@ -290,5 +295,6 @@ async function init() {
 }
 
 init();
+
 
 
