@@ -190,20 +190,21 @@ const displayYear =
 
 
 
-    html += `
-      <article class="card" onclick="openReview('${escapeQuotes(item.id)}')">
-        ${isAdmin ? `<button class="delete-btn" onclick="deleteReview(event, '${escapeQuotes(item.id)}')">🗑️</button>` : ""}
-        <img src="${poster}" alt="${escapeQuotes(titleShow)}">
-        <div class="card-content">
-         <h2>${displayTitle} (${displayYear})</h2>
-          <div class="stars">${stars}</div>
-          <div class="score">${item.rating} / 10</div>
-          <p class="review-text">${item.review.substring(0, 80)}...</p>
-        </div>
-      </article>
-    `;
-    rendered++;
-  }
+ html += `
+  <article class="card" onclick="openReview('${escapeQuotes(item.id)}')">
+    ${isAdmin ? `<button class="delete-btn" onclick="deleteReview(event, '${escapeQuotes(item.id)}')">🗑️</button>` : ""}
+
+    <img src="${poster}" alt="${escapeQuotes(displayTitle)}">
+
+    <div class="card-content">
+      <h2>${displayTitle} (${displayYear})</h2>
+      <div class="stars">${stars}</div>
+      <div class="score">${item.rating} / 10</div>
+      <p class="review-text">${item.review.substring(0, 80)}...</p>
+    </div>
+  </article>
+`;
+
 
   container.innerHTML =
     rendered > 0
@@ -342,6 +343,7 @@ async function init() {
 }
 
 init();
+
 
 
 
