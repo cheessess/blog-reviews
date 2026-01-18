@@ -176,8 +176,9 @@ if (item.type === "movie") {
 if (!media) {
   console.warn("⚠️ No se encontró en TMDB:", item.title, item.type);
   continue;
+  
 }
-<h2>${displayTitle} (${displayYear})</h2>
+
 
 const poster = media.poster_path
   ? IMG_URL + media.poster_path
@@ -200,7 +201,7 @@ const displayYear =
         ${isAdmin ? `<button class="delete-btn" onclick="deleteReview(event, '${escapeQuotes(item.id)}')">🗑️</button>` : ""}
         <img src="${poster}" alt="${escapeQuotes(titleShow)}">
         <div class="card-content">
-          <h2>${titleShow} (${yearShow})</h2>
+         <h2>${displayTitle} (${displayYear})</h2>
           <div class="stars">${stars}</div>
           <div class="score">${item.rating} / 10</div>
           <p class="review-text">${item.review.substring(0, 80)}...</p>
@@ -347,7 +348,6 @@ async function init() {
 }
 
 init();
-
 
 
 
