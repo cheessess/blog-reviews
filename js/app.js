@@ -114,7 +114,7 @@ async function deleteReviewFromDB(id) {
 // --- TMDB: buscar película con filtro opcional por año ---
 async function fetchMovie(title, year) {
   const url =
-    `https://api.themoviedb.org/3/search/movie?api_key=${5ae6a264fee9e701870f16ffb3cc71cc}` +
+    `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}` +
     `&query=${encodeURIComponent(title)}` +
     `&language=es-ES&include_adult=false`;
 
@@ -134,7 +134,7 @@ async function fetchMovie(title, year) {
 }
 async function fetchTV(title, year) {
   const url =
-    `https://api.themoviedb.org/3/search/tv?api_key=${5ae6a264fee9e701870f16ffb3cc71cc}` +
+    `https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}` +
     `&query=${encodeURIComponent(title)}` +
     `&language=es-MX&include_adult=false`;
 
@@ -342,6 +342,7 @@ async function init() {
 }
 
 init();
+
 
 
 
