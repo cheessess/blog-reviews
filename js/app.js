@@ -188,13 +188,7 @@ const displayTitle = media.title || media.name || item.title;
 const displayYear =
   (media.release_date || media.first_air_date || "").slice(0, 4) || "----";
 
-    const poster = movie?.poster_path
-      ? IMG_URL + movie.poster_path
-      : "https://via.placeholder.com/500x750?text=No+Image";
 
-    const titleShow = movie?.title ?? item.title;
-    const yearShow = movie?.release_date ? movie.release_date.slice(0, 4) : (item.year ?? "----");
-    const stars = generateStars(item.rating);
 
     html += `
       <article class="card" onclick="openReview('${escapeQuotes(item.id)}')">
@@ -348,6 +342,7 @@ async function init() {
 }
 
 init();
+
 
 
 
