@@ -35,16 +35,23 @@ function escapeQuotes(str) {
 }
 
 function generateStars(rating) {
-  const fullStars = Math.floor(rating / 2);
-  const halfStar = rating % 2 >= 1;
+  const maxStars = 5;
+  const normalized = rating / 2; // 0–5
   let stars = "";
 
-  for (let i = 0; i < fullStars; i++) stars += "★";
-  if (halfStar) stars += "☆";
-  while (stars.length < 5) stars += "☆";
+  for (let i = 1; i <= maxStars; i++) {
+    if (normalized >= i) {
+      stars += "★";
+    } else if (normalized >= i - 0.5) {
+      stars += "⯪"; // estrella parcial
+    } else {
+      stars += "☆";
+    }
+  }
 
   return stars;
 }
+
 
 // --- Supabase: verificar si el usuario actual es admin ---
 async function checkIsAdmin() {
@@ -343,6 +350,7 @@ async function init() {
 }
 
 init();
+
 
 
 
