@@ -177,6 +177,7 @@ if (!media) {
   console.warn("⚠️ No se encontró en TMDB:", item.title, item.type);
   continue;
 }
+<h2>${displayTitle} (${displayYear})</h2>
 
 const poster = media.poster_path
   ? IMG_URL + media.poster_path
@@ -335,6 +336,7 @@ async function init() {
 }
 
 init();
+
 
 
 
