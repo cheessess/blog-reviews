@@ -222,10 +222,21 @@ async function openReview(id) {
   if (!item) return;
 
   const movie = await fetchMovie(item.title, item.year);
+const fetchFn = item.type === "tv" ? fetchTV : fetchMovie;
 
-  const poster = movie?.poster_path
-    ? IMG_URL + movie.poster_path
+fetchFn(item.title, item.year).then(media => {
+  const poster = media?.poster_path
+    ? IMG_URL + media.poster_path
     : "https://via.placeholder.com/500x750?text=No+Image";
+
+  const displayTitle = media?.title || media?.name || item.title;
+  const displayYear =
+    (media?.release_date || media?.first_air_date || "").slice(0,4) || "----";
+
+  viewTitle.textContent = `${displayTitle} (${displayYear})`;
+  // lo demás igual...
+});
+
 
   const titleShow = movie?.title ?? item.title;
   const yearShow = movie?.release_date ? movie.release_date.slice(0, 4) : (item.year ?? "----");
@@ -336,6 +347,7 @@ async function init() {
 }
 
 init();
+
 
 
 
