@@ -132,6 +132,29 @@ async function fetchMovie(title, year) {
 
   return results[0];
 }
+async function fetchTV(title, year) {
+  const url =
+    `https://api.themoviedb.org/3/search/tv?api_key=${API_KEY}` +
+    `&query=${encodeURIComponent(title)}` +
+    `&language=es-MX&include_adult=false`;
+
+  console.log("📺 buscando TV:", title, year ? `(año ${year})` : "");
+
+  const response = await fetch(url);
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  const results = data.results ?? [];
+  if (results.length === 0) return null;
+
+  // si pones año, intentamos matchear por first_air_date
+  if (year) {
+    const match = results.find(r => (r.first_air_date || "").startsWith(String(year)));
+    return match ?? results[0];
+  }
+
+  return results[0];
+}
 
 // --- Render ---
 async function renderReviews() {
@@ -295,6 +318,7 @@ async function init() {
 }
 
 init();
+
 
 
 
