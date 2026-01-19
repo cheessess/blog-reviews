@@ -171,47 +171,73 @@ async function renderReviews() {
   let rendered = 0;
 
   for (const item of reviews) {
-    // por ahora solo movies (si luego metemos tv/books, lo expandimos)
-  let media = null;
+    let media = null;
 
-if (item.type === "movie") {
-  media = await fetchMovie(item.title, item.year);
-} else if (item.type === "tv") {
-  media = await fetchTV(item.title, item.year);
-}
+    // 1) Si es novela: NO buscamos en TMDB
+    if (item.type === "novela") {
+      const poster =
+        item.custom_image ||
+        "https://via.placeholder.com/500x750?text=No+Image";
 
-if (!media) {
-  console.warn("⚠️ No se encontró en TMDB:", item.title, item.type);
-  continue;
-  
-}
+      const displayTitle = item.title;
+      const displayYear = item.year ? String(item.year) : "----";
+      const stars = generateStars(item.rating);
 
+      html += `
+        <article class="card" onclick="openReview('${escapeQuotes(item.id)}')">
+          ${isAdmin ? `<button class="delete-btn" onclick="deleteReview(event, '${escapeQuotes(item.id)}')">🗑️</button>` : ""}
 
-const poster = media.poster_path
-  ? IMG_URL + media.poster_path
-  : "https://via.placeholder.com/500x750?text=No+Image";
+          <img src="${poster}" alt="${escapeQuotes(displayTitle)}">
 
-const displayTitle = media.title || media.name || item.title;
-const displayYear =
-  (media.release_date || media.first_air_date || "").slice(0, 4) || "----";
+          <div class="card-content">
+            <h2>${displayTitle} (${displayYear})</h2>
+            <div class="stars">${stars}</div>
+            <div class="score">${item.rating} / 10</div>
+            <p class="review-text">${item.review.substring(0, 80)}...</p>
+          </div>
+        </article>
+      `;
 
+      rendered++;
+      continue;
+    }
 
+    // 2) Movie / TV: TMDB
+    if (item.type === "movie") media = await fetchMovie(item.title, item.year);
+    else if (item.type === "tv") media = await fetchTV(item.title, item.year);
 
- html += `
-  <article class="card" onclick="openReview('${escapeQuotes(item.id)}')">
-    ${isAdmin ? `<button class="delete-btn" onclick="deleteReview(event, '${escapeQuotes(item.id)}')">🗑️</button>` : ""}
+    if (!media) {
+      console.warn("⚠️ No se encontró en TMDB:", item.title, item.type);
+      continue;
+    }
 
-    <img src="${poster}" alt="${escapeQuotes(displayTitle)}">
+    const poster = media.poster_path
+      ? IMG_URL + media.poster_path
+      : (item.custom_image || "https://via.placeholder.com/500x750?text=No+Image");
 
-    <div class="card-content">
-      <h2>${displayTitle} (${displayYear})</h2>
-      <div class="stars">${stars}</div>
-      <div class="score">${item.rating} / 10</div>
-      <p class="review-text">${item.review.substring(0, 80)}...</p>
-    </div>
-  </article>
-`;
+    const displayTitle = media.title || media.name || item.title;
+    const displayYear =
+      (media.release_date || media.first_air_date || "").slice(0, 4) || "----";
 
+    const stars = generateStars(item.rating);
+
+    html += `
+      <article class="card" onclick="openReview('${escapeQuotes(item.id)}')">
+        ${isAdmin ? `<button class="delete-btn" onclick="deleteReview(event, '${escapeQuotes(item.id)}')">🗑️</button>` : ""}
+
+        <img src="${poster}" alt="${escapeQuotes(displayTitle)}">
+
+        <div class="card-content">
+          <h2>${displayTitle} (${displayYear})</h2>
+          <div class="stars">${stars}</div>
+          <div class="score">${item.rating} / 10</div>
+          <p class="review-text">${item.review.substring(0, 80)}...</p>
+        </div>
+      </article>
+    `;
+
+    rendered++;
+  }
 
   container.innerHTML =
     rendered > 0
@@ -219,32 +245,36 @@ const displayYear =
       : `<p style="padding:2rem;opacity:.85;">No hay reviews todavía.</p>`;
 }
 
+
 // --- Modal ver review (usa id ahora) ---
 async function openReview(id) {
   const item = reviews.find(r => r.id === id);
   if (!item) return;
 
-  const movie = await fetchMovie(item.title, item.year);
-const fetchFn = item.type === "tv" ? fetchTV : fetchMovie;
+  // NOVELA: sin TMDB
+  if (item.type === "novela") {
+    viewTitle.textContent = `${item.title} (${item.year ? item.year : "----"})`;
+    viewImage.src = item.custom_image || "https://via.placeholder.com/500x750?text=No+Image";
+    viewStars.textContent = generateStars(item.rating);
+    viewScore.textContent = `${item.rating} / 10`;
+    viewReview.textContent = item.review;
+    viewModal.classList.remove("hidden");
+    return;
+  }
 
-fetchFn(item.title, item.year).then(media => {
+  // MOVIE/TV: TMDB
+  const fetchFn = item.type === "tv" ? fetchTV : fetchMovie;
+  const media = await fetchFn(item.title, item.year);
+
   const poster = media?.poster_path
     ? IMG_URL + media.poster_path
-    : "https://via.placeholder.com/500x750?text=No+Image";
+    : (item.custom_image || "https://via.placeholder.com/500x750?text=No+Image");
 
   const displayTitle = media?.title || media?.name || item.title;
   const displayYear =
-    (media?.release_date || media?.first_air_date || "").slice(0,4) || "----";
+    (media?.release_date || media?.first_air_date || "").slice(0, 4) || (item.year ? String(item.year) : "----");
 
   viewTitle.textContent = `${displayTitle} (${displayYear})`;
-  // lo demás igual...
-});
-
-
-  const titleShow = movie?.title ?? item.title;
-  const yearShow = movie?.release_date ? movie.release_date.slice(0, 4) : (item.year ?? "----");
-
-  viewTitle.textContent = `${titleShow} (${yearShow})`;
   viewImage.src = poster;
   viewStars.textContent = generateStars(item.rating);
   viewScore.textContent = `${item.rating} / 10`;
@@ -252,6 +282,7 @@ fetchFn(item.title, item.year).then(media => {
 
   viewModal.classList.remove("hidden");
 }
+
 
 // cierre modal ver
 viewClose.addEventListener("click", () => viewModal.classList.add("hidden"));
@@ -299,6 +330,8 @@ modal.addEventListener("click", (e) => {
 
 // submit agregar -> DB
 form.addEventListener("submit", async (e) => {
+  const custom_image = document.getElementById("custom_image").value.trim() || null;
+
   e.preventDefault();
   if (!isAdmin) return;
 
@@ -312,7 +345,8 @@ form.addEventListener("submit", async (e) => {
   if (!title || !review || Number.isNaN(rating)) return;
 
   try {
-    await insertReviewToDB({ type, title, year, rating, review });
+    await insertReviewToDB({ type, title, year, rating, review, custom_image });
+
     form.reset();
     modal.classList.add("hidden");
 
@@ -350,6 +384,7 @@ async function init() {
 }
 
 init();
+
 
 
 
